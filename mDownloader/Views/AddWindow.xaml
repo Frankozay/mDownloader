@@ -1,0 +1,35 @@
+﻿<Window x:Class="mDownloader.Views.AddWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:mDownloader.Views"
+        mc:Ignorable="d"
+        Title="Add Download" Height="200" Width="500"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- URL and Download Path -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Column="0" Content="URL" VerticalAlignment="Center"/>
+            <TextBox Name="UrlText" Grid.Column="1" Margin="10,0"/>
+            <Button Name="ChoosePathButton" Grid.Column="2" Content="Choose Path" Click="ChoosePath_Click"/>
+        </Grid>
+
+        <!-- OK and Cancel Buttons -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Click="Download_Click" Content="OK" Margin="0,0,10,0"/>
+            <Button Content="Cancel"/>
+        </StackPanel>
+    </Grid>
+</Window>

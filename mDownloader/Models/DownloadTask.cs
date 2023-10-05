@@ -22,4 +22,8 @@ public partial class DownloadTask
     public int Status { get; set; }
 
     public bool IsQueued { get; set; }
+
+    public string Name { get; set; } = null!;
+
+    public long Size { get; set; }
 }

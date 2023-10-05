@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace mDownloader.Models;
 
-public partial class AppDbContext : DbContext
+public partial class AppContext : DbContext
 {
-    public AppDbContext()
+    public AppContext()
     {
     }
 
-    public AppDbContext(DbContextOptions<AppDbContext> options)
+    public AppContext(DbContextOptions<AppContext> options)
         : base(options)
     {
     }
@@ -28,6 +28,7 @@ public partial class AppDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK__Download__3214EC07AC322252");
 
             entity.Property(e => e.Destination).HasMaxLength(1000);
+            entity.Property(e => e.Name).HasMaxLength(1000);
             entity.Property(e => e.Url).HasMaxLength(1000);
         });
 
