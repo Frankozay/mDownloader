@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using mDownloader.Services;
 using mDownloader.ViewModels;
 using mDownloader.Views;
+using mDownloader.Factories;
 
 namespace mDownloader
 {
@@ -25,7 +26,7 @@ namespace mDownloader
 
         private void ConfigureServices(ServiceCollection services)
         {
-            services.AddHttpClient<DownloadObject>();
+            services.AddHttpClient<DownloadObjectFactory>();
         }
     }
 }

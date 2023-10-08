@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using mDownloader;
 using mDownloader.Services;
 using mDownloader.ViewModels;
@@ -41,6 +42,8 @@ namespace mDownloader.Views
         {
             var url = UrlText.Text;
             _viewModel.DownloadNewTask(url, _selectedPath);
+            var window = Window.GetWindow((Button)sender);
+            window?.Close();
         }
     }
 }

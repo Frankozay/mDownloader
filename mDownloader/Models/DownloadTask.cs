@@ -1,4 +1,5 @@
-﻿using System;
+﻿using mDownloader.Enums;
+using System;
 using System.Collections.Generic;
 
 namespace mDownloader.Models;
@@ -19,7 +20,7 @@ public partial class DownloadTask
 
     public int? StatusCode { get; set; }
 
-    public int Status { get; set; }
+    public Status Status { get; set; }
 
     public bool IsQueued { get; set; }
 
