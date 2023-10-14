@@ -8,7 +8,6 @@ using mDownloader.Services;
 using mDownloader.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.WindowsAPICodePack.Dialogs;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace mDownloader.Views
 {
@@ -17,15 +16,16 @@ namespace mDownloader.Views
     /// </summary>
     public partial class AddWindow : Window
     {
-        private AddViewModel _viewModel;
+        private AddViewModel? _viewModel;
+        private MainViewModel? _mainViewModel;
         private string _selectedPath;
-        public AddWindow()
+        public AddWindow(MainViewModel? mainViewModel)
         {
             InitializeComponent();
-            _viewModel = new AddViewModel();
+            _viewModel = App.ServiceProvider!.GetService<AddViewModel>();
             _selectedPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
             ChoosePathButton.Content = _selectedPath;
-
+            _mainViewModel = mainViewModel;
         }
         private void ChoosePath_Click(object sender, RoutedEventArgs e)
         {
@@ -41,9 +41,9 @@ namespace mDownloader.Views
         private void Download_Click(object sender, RoutedEventArgs e)
         {
             var url = UrlText.Text;
-            _viewModel.DownloadNewTask(url, _selectedPath);
-            var window = Window.GetWindow((Button)sender);
-            window?.Close();
+            _viewModel!.DownloadNewTask(url, _selectedPath);
+            this.Close();
+
         }
     }
 }

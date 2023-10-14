@@ -21,8 +21,8 @@ namespace mDownloader.Factories
             var downloadObject = new DownloadObject(_httpClient)
             {
                 Url = url,
-                DownloadPath = downloadPath,
-                TotalBytesDownload = totalBytesDownload,
+                Destination = downloadPath,
+                TotalBytesToDownload = totalBytesDownload,
                 Id = id
             };
 

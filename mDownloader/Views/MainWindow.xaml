@@ -25,15 +25,16 @@
         </StackPanel>
 
         <!-- Data Grid -->
-        <DataGrid Grid.Row="1" Margin="10" AutoGenerateColumns="False">
+        <DataGrid x:Name="DownloadDataGrid" Grid.Row="1" Margin="10" AutoGenerateColumns="False">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
-                <DataGridTextColumn Header="Size" Binding="{Binding Size}"/>
-                <DataGridTextColumn Header="Progress" Binding="{Binding Progress}"/>
-                <DataGridTextColumn Header="Status" Binding="{Binding Status}"/>
-                <DataGridTextColumn Header="Estimate Time" Binding="{Binding EstimateTime}"/>
-                <DataGridTextColumn Header="Transfer Rate" Binding="{Binding TransferRate}"/>
-                <DataGridTextColumn Header="Create Time" Binding="{Binding CreateTime}"/>
+                <DataGridTextColumn Header="Name" IsReadOnly="True" Binding="{Binding Name}"/>
+                <DataGridTextColumn Header="Size" IsReadOnly="True" Binding="{Binding Size}"/>
+                <DataGridTextColumn Header="Progress" IsReadOnly="True" Binding="{Binding Progress}"/>
+                <DataGridTextColumn Header="Status"  IsReadOnly="True" Binding="{Binding Status}"/>
+                <DataGridTextColumn Header="Estimate Time" IsReadOnly="True" Binding="{Binding EstimateTime}"/>
+                <DataGridTextColumn Header="Transfer Rate" IsReadOnly="True" Binding="{Binding TransferRate}"/>
+                <DataGridTextColumn Header="Create Time" IsReadOnly="True" Binding="{Binding DateCreated}"/>
+                <DataGridTextColumn Header="Finish Time" IsReadOnly="True" Binding="{Binding DateFinished}"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

@@ -1,5 +1,6 @@
 ﻿using mDownloader.Enums;
 using mDownloader.Models;
+using mDownloader.Converters;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,29 +17,17 @@ using AppContext = mDownloader.Models.AppContext;
 
 namespace mDownloader.Services
 {
-    public class DownloadObject
+    public class DownloadObject : WDownloadObject
     {
         private HttpClient _httpClient;
         private CancellationTokenSource _cts = new CancellationTokenSource();
         private const int _BUFFER = 8192;
         private const int _POINT = 1024 * 1000;
 
-        public int? Id { get; set; } = -1;
-        public string? Url { get; set; }
-        public string? DownloadPath { get; set; }
-        public long TotalBytesDownload { get; set; } = 0;
-        public DateTime? DateCreated { get; set; }
+        public int? Progress { get; set; }
+        public DateTime? EstimateTime { get; set; }
+        public long? TransferRate { get; set; }
 
-        public DateTime? DateFinished { get; set; }
-        public int? StatusCode { get; set; }
-
-        public Status? Status { get; set; }
-
-        public bool? IsQueued { get; set; }
-
-        public string? Name { get; set; }
-
-        public long? Size { get; set; }
         public Task? Task { get; private set; }
 
         public DownloadObject(HttpClient httpClient)
@@ -59,12 +48,12 @@ namespace mDownloader.Services
             {
                 return;
             }
-            if(DownloadPath == null)
+            if(Destination == null)
             {
                 return;
             }
             var request = new HttpRequestMessage { RequestUri = new Uri(Url), Method = HttpMethod.Get };
-            request.Headers.Range = new RangeHeaderValue(TotalBytesDownload, null);
+            request.Headers.Range = new RangeHeaderValue(TotalBytesToDownload, null);
             try
             {
                 using (var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, _cts.Token))
@@ -74,12 +63,16 @@ namespace mDownloader.Services
                     if(Id < 0)
                     {
                         Name = !string.IsNullOrEmpty(response.Content.Headers.ContentDisposition?.FileName)
-                            ? response.Content.Headers.ContentDisposition?.FileName
+                            ? response.Content.Headers.ContentDisposition!.FileName
                             : Path.GetFileName(uri.LocalPath);
 
                         var statusCode = response.StatusCode;
                         StatusCode = (int?)statusCode;
-                        Size = response.Content.Headers.ContentLength;
+                        Size = (long?)response.Content.Headers.ContentLength;
+                        DateCreated = DateTime.Now;
+                        TotalBytesToDownload = 0;
+                        Status = Enums.Status.Downloading;
+                        StatusCode = (int?)response.StatusCode;
                         if (this.Id < 0 && Name == null)
                         {
                             throw new Exception("Not have file name");
@@ -94,40 +87,30 @@ namespace mDownloader.Services
                         }
                         using (var context = new AppContext())
                         {
-                            var task = new DownloadTask
-                            {
-                                Url = Url,
-                                Destination = DownloadPath,
-                                Name = Name!,
-                                DateCreated = DateTime.Now,
-                                TotalBytesToDownload = 0,
-                                Status = Enums.Status.Downloading,
-                                StatusCode = (int?)response.StatusCode,
-                                Size = (long)Size!,
-                            };
-                            context.DownloadTasks.Add(task);
+                            var dbObj = SimpleMapper.Map<WDownloadObject, DownloadTask>(this, true);
+                            context.DownloadTasks.Add(dbObj);
                             await context.SaveChangesAsync();
-                            this.Id = task.Id;
+                            this.Id = dbObj.Id;
                         }
                     }
 
 
                     using (var stream = await response.Content.ReadAsStreamAsync())
                     {
-                        if (File.Exists(Path.Combine(DownloadPath, Name!)))
+                        if (File.Exists(Path.Combine(Destination, Name!)))
                         {
                             // 恢复下载时，建立连接时检查一次就可以了
-                            var fileInfo = new FileInfo(Path.Combine(DownloadPath, Name!));
-                            TotalBytesDownload = fileInfo.Length;
+                            var fileInfo = new FileInfo(Path.Combine(Destination, Name!));
+                            TotalBytesToDownload = fileInfo.Length;
                             using (var context = new AppContext())
                             {
                                 var task = context.DownloadTasks.First(t => t.Id == this.Id);
-                                task.TotalBytesToDownload = TotalBytesDownload;
+                                task.TotalBytesToDownload = TotalBytesToDownload;
                                 context.Update(task);
                                 await context.SaveChangesAsync();
                             }
                         }
-                        using (var outputStream = new FileStream(Path.Combine(DownloadPath, Name!), FileMode.Append, FileAccess.Write, FileShare.None))
+                        using (var outputStream = new FileStream(Path.Combine(Destination, Name!), FileMode.Append, FileAccess.Write, FileShare.None))
                         {
                             var buffer = new byte[_BUFFER];
                             int bytesRead;
@@ -144,12 +127,12 @@ namespace mDownloader.Services
                                         task.TotalBytesToDownload += streamBytesDownload;
                                         context.Update(task);
                                         await context.SaveChangesAsync();
-                                        this.TotalBytesDownload = task.TotalBytesToDownload;
+                                        this.TotalBytesToDownload = task.TotalBytesToDownload;
                                         streamBytesDownload = 0;
                                     }
                                 }
                             }
-                            if(TotalBytesDownload + streamBytesDownload != Size)
+                            if(TotalBytesToDownload + streamBytesDownload != Size)
                             {
                                 throw new Exception("Download file size is not equal real size.");
                             } else
@@ -158,9 +141,11 @@ namespace mDownloader.Services
                                 {
                                     var task = context.DownloadTasks.First(t => t.Id == this.Id);
                                     task.TotalBytesToDownload += streamBytesDownload;
+                                    task.Status = Enums.Status.Compeleted;
+                                    task.DateFinished = DateTime.Now;
                                     context.Update(task);
                                     await context.SaveChangesAsync();
-                                    this.TotalBytesDownload = task.TotalBytesToDownload;
+                                    this.TotalBytesToDownload = task.TotalBytesToDownload;
                                     streamBytesDownload = 0;
                                 }
                             }

@@ -27,6 +27,9 @@ namespace mDownloader
         private void ConfigureServices(ServiceCollection services)
         {
             services.AddHttpClient<DownloadObjectFactory>();
+            services.AddTransient<AddViewModel>();
+            services.AddTransient<MainViewModel>();
+            services.AddScoped<IDownloadService, DownloadService>();
         }
     }
 }
