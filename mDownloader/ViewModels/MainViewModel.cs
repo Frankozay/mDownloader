@@ -19,7 +19,7 @@ namespace mDownloader.ViewModels
         private readonly IWindowService _windowService;
 
         private ICommand _addDownloadCommand;
-        public ObservableCollection<DownloadTaskDisplay> DownloadLists { get; } = new();
+        public ObservableCollection<DownloadObject> DownloadLists { get; } = new();
 
         public MainViewModel(IDownloadService downloadService, IWindowService windowService)
         {

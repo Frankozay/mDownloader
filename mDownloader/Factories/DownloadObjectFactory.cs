@@ -1,4 +1,6 @@
-﻿using mDownloader.Services;
+﻿using mDownloader.Converters;
+using mDownloader.Models;
+using mDownloader.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +29,11 @@ namespace mDownloader.Factories
             };
 
             return downloadObject;
+        }
+        public DownloadObject Create(DownloadTask downloadTask)
+        {
+            var download = SimpleMapper.Map<DownloadTask, DownloadObject>(downloadTask, new object[] { _httpClient }, false);
+            return download;
         }
 
     }

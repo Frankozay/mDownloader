@@ -87,7 +87,7 @@ namespace mDownloader.Services
                         }
                         using (var context = new AppContext())
                         {
-                            var dbObj = SimpleMapper.Map<WDownloadObject, DownloadTask>(this, true);
+                            var dbObj = SimpleMapper.Map<WDownloadObject, DownloadTask>(this, new object[0], true);
                             context.DownloadTasks.Add(dbObj);
                             await context.SaveChangesAsync();
                             this.Id = dbObj.Id;

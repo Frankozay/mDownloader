@@ -10,12 +10,13 @@ namespace mDownloader.Converters
 {
     public static class SimpleMapper
     {
-        public static TTarget Map<TSource, TTarget>(TSource source, Boolean expectedId=false)
+        public static TTarget Map<TSource, TTarget>(TSource source, object[]? ctorArgs=null, Boolean expectedId=false)
             where TSource : class
-            where TTarget : class, new()
+            where TTarget : class
         {
             if (source == null) throw new ArgumentNullException();
-            var target = new TTarget();
+            ctorArgs = ctorArgs ?? new object[0];
+            var target = Activator.CreateInstance(typeof(TTarget), ctorArgs) as TTarget;
 
             var sourceProperties = typeof(TSource).GetProperties();
             var targetProperties = typeof(TTarget).GetProperties();
@@ -26,9 +27,7 @@ namespace mDownloader.Converters
                     continue;
                 }
                 var targetProp = targetProperties.FirstOrDefault(p =>
-                p.Name == sourceProp.Name &&
-                (p.PropertyType == sourceProp.PropertyType ||
-                p.PropertyType == Nullable.GetUnderlyingType(sourceProp.PropertyType)));
+                p.Name == sourceProp.Name);
                 if(targetProp != null && targetProp.CanWrite && sourceProp.CanRead)
                 {
                     var value = sourceProp.GetValue(source);
@@ -39,7 +38,7 @@ namespace mDownloader.Converters
                 }
 
             }
-            return target;
+            return target!;
         }
     }
 }

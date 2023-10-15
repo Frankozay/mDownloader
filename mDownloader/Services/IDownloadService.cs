@@ -10,6 +10,6 @@ namespace mDownloader.Services
 {
     public interface IDownloadService
     {
-        public List<DownloadTaskDisplay> LoadTasks();
+        public List<DownloadObject> LoadTasks();
     }
 }

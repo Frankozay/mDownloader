@@ -7,23 +7,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using mDownloader.Converters;
+using mDownloader.Factories;
 
 namespace mDownloader.Services
 {
     public class DownloadService : IDownloadService
     {
-        List<DownloadTaskDisplay> IDownloadService.LoadTasks()
+        private readonly DownloadObjectFactory _downloadObjectFactory;
+        public DownloadService(DownloadObjectFactory downloadObjectFactory) {
+            _downloadObjectFactory = downloadObjectFactory;
+        }
+        List<DownloadObject> IDownloadService.LoadTasks()
         {
-            List<DownloadTaskDisplay> res = new();
+            List<DownloadObject> res = new();
             using (var db = new Models.AppContext())
             {
                 List<DownloadTask> tasks = db.DownloadTasks.ToList();
                 foreach (var task in tasks)
                 {
-                    var taskDisplay = SimpleMapper.Map<DownloadTask, DownloadTaskDisplay>(task);
+                    var taskDisplay = _downloadObjectFactory.Create(task);
+
                     if (taskDisplay.Size != 0)
                     {
-                        taskDisplay.Progress = (int)(taskDisplay.TotalBytesToDownload / taskDisplay.Size);
+                        taskDisplay.Progress = (int?)(taskDisplay.TotalBytesToDownload / taskDisplay.Size);
                         res.Add(taskDisplay);
                     } else
                     {
