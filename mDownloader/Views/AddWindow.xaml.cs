@@ -16,12 +16,10 @@ namespace mDownloader.Views
     /// </summary>
     public partial class AddWindow : Window
     {
-        private AddViewModel? _viewModel;
-        public AddWindow()
+        public AddWindow(AddViewModel addViewModel)
         {
             InitializeComponent();
-            _viewModel = App.ServiceProvider!.GetService<AddViewModel>();
-            DataContext = _viewModel;
+            DataContext = addViewModel;
         }
     }
 }

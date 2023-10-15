@@ -18,14 +18,14 @@
 
         <!-- Buttons -->
         <StackPanel Orientation="Horizontal" Margin="10">
-            <Button Content="Add Download" Margin="0,0,10,0" Click="AddDownload_Click"/>
+            <Button Content="Add Download" Margin="0,0,10,0" Command="{Binding AddDownloadCommand}"/>
             <Button Content="Remove Download" Margin="0,0,10,0"/>
             <Button Content="Continue Download" Margin="0,0,10,0"/>
             <Button Content="Pause Download" Margin="0,0,10,0"/>
         </StackPanel>
 
         <!-- Data Grid -->
-        <DataGrid x:Name="DownloadDataGrid" Grid.Row="1" Margin="10" AutoGenerateColumns="False">
+        <DataGrid x:Name="DownloadDataGrid" ItemsSource="{Binding DownloadLists}" Grid.Row="1" Margin="10" AutoGenerateColumns="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Name" IsReadOnly="True" Binding="{Binding Name}"/>
                 <DataGridTextColumn Header="Size" IsReadOnly="True" Binding="{Binding Size}"/>

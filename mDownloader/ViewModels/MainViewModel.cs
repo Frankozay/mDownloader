@@ -1,4 +1,5 @@
-﻿using mDownloader.Models;
+﻿using mDownloader.Helpers;
+using mDownloader.Models;
 using mDownloader.Services;
 using System;
 using System.Collections.Generic;
@@ -8,32 +9,39 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace mDownloader.ViewModels
 {
-    public class MainViewModel: INotifyPropertyChanged
+    public class MainViewModel : ViewModelBase
     {
+        private readonly IDownloadService _downloadService;
+        private readonly IWindowService _windowService;
+
+        private ICommand _addDownloadCommand;
         public ObservableCollection<DownloadTaskDisplay> DownloadLists { get; } = new();
-        public IDownloadService DownloadService { get; set; }
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void RaisePropertyChanged(string propertyName)
+
+        public MainViewModel(IDownloadService downloadService, IWindowService windowService)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            _downloadService = downloadService;
+            _windowService = windowService;
+            LoadTasks();
         }
 
-        public MainViewModel(IDownloadService downloadService) { 
-            DownloadService = downloadService;
+        public ICommand AddDownloadCommand => _addDownloadCommand ??= new RelayCommand(_ => AddDownload());
+        public void AddDownload()
+        {
+            _windowService.OpenAddWindow();
         }
-
-
         public void LoadTasks()
         {
             DownloadLists.Clear();
-            var tasks = DownloadService.LoadTasks();
-            foreach (var task in tasks) { 
+            var tasks = _downloadService.LoadTasks();
+            foreach (var task in tasks)
+            {
                 DownloadLists.Add(task);
             }
-            RaisePropertyChanged(nameof(DownloadLists));
         }
     }
 }
+

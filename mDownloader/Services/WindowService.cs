@@ -1,4 +1,5 @@
 ﻿using mDownloader.Views;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,8 +23,8 @@ namespace mDownloader.Services
         {
             if (_addWindow == null || !_addWindow.IsVisible)
             {
-                _addWindow = new AddWindow();
-                _addWindow.Closed += (sender, e) => _addWindow = null;
+                _addWindow = App.ServiceProvider!.GetService<AddWindow>();
+                _addWindow!.Closed += (sender, e) => _addWindow = null;
                 _addWindow.Owner = _owner;
                 _addWindow?.Show();
             }

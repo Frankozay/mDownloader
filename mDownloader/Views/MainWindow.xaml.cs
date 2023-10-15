@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using mDownloader;
 using mDownloader.Models;
+using mDownloader.Services;
 using mDownloader.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,36 +27,14 @@ namespace mDownloader.Views
     /// </summary>
     public partial class MainWindow : Window
     {
-        private AddWindow? _addWindow;
-        private MainViewModel? _mainViewModel;
+        private readonly IWindowService _windowService;
 
-        public MainWindow()
+        public MainWindow(MainViewModel mainViewModel, IWindowService windowService)
         {
             InitializeComponent();
-            _mainViewModel = App.ServiceProvider!.GetService<MainViewModel>();
-            this.DataContext = _mainViewModel;
-            DownloadDataGrid.ItemsSource = _mainViewModel!.DownloadLists;
-            _mainViewModel!.LoadTasks();
-            Debug.WriteLine(_mainViewModel!.DownloadLists.ToList<DownloadTask>()[0].DateCreated);
-        }
-
-        private void AddDownload_Click(object sender, RoutedEventArgs e)
-        {
-            if(_addWindow == null || !_addWindow.IsVisible)
-            {
-                _addWindow = new AddWindow((MainViewModel)DataContext);
-                _addWindow.Closed += (sender, e) => _addWindow = null;
-                _addWindow.Owner = this;
-                _addWindow?.Show();
-            }
-            else
-            {
-                if(_addWindow.WindowState == WindowState.Minimized)
-                {
-                    _addWindow.WindowState = WindowState.Normal;
-                }
-                _addWindow.Activate();
-            }
+            DataContext = mainViewModel;
+            _windowService = windowService;
+            _windowService.SetOwner(this);
         }
 
     }
