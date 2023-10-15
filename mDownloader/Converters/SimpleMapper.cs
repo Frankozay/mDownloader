@@ -31,7 +31,6 @@ namespace mDownloader.Converters
                 p.PropertyType == Nullable.GetUnderlyingType(sourceProp.PropertyType)));
                 if(targetProp != null && targetProp.CanWrite && sourceProp.CanRead)
                 {
-                    Debug.WriteLine(targetProp.Name);
                     var value = sourceProp.GetValue(source);
                     if (value != null || Nullable.GetUnderlyingType(sourceProp.PropertyType) != null)
                     {

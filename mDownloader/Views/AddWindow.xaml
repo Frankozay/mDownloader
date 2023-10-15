@@ -22,13 +22,13 @@
             </Grid.ColumnDefinitions>
 
             <Label Grid.Column="0" Content="URL" VerticalAlignment="Center"/>
-            <TextBox Name="UrlText" Grid.Column="1" Margin="10,0"/>
-            <Button Name="ChoosePathButton" Grid.Column="2" Content="Choose Path" Click="ChoosePath_Click"/>
+            <TextBox Name="UrlText" Grid.Column="1" Margin="10,0" Text="{Binding Url, UpdateSourceTrigger=PropertyChanged}"/>
+            <Button Name="ChoosePathButton" Grid.Column="2" Content="{Binding SelectedPath, UpdateSourceTrigger=PropertyChanged}" Command="{Binding ChoosePathCommand}"/>
         </Grid>
 
         <!-- OK and Cancel Buttons -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <Button Click="Download_Click" Content="OK" Margin="0,0,10,0"/>
+            <Button Command="{Binding DownloadCommand}" Content="OK" Margin="0,0,10,0"/>
             <Button Content="Cancel"/>
         </StackPanel>
     </Grid>

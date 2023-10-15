@@ -30,6 +30,7 @@ namespace mDownloader
             services.AddTransient<AddViewModel>();
             services.AddTransient<MainViewModel>();
             services.AddScoped<IDownloadService, DownloadService>();
+            services.AddScoped<IWindowService, WindowService>();
         }
     }
 }

@@ -141,7 +141,7 @@ namespace mDownloader.Services
                                 {
                                     var task = context.DownloadTasks.First(t => t.Id == this.Id);
                                     task.TotalBytesToDownload += streamBytesDownload;
-                                    task.Status = Enums.Status.Compeleted;
+                                    task.Status = Enums.Status.Completed;
                                     task.DateFinished = DateTime.Now;
                                     context.Update(task);
                                     await context.SaveChangesAsync();
