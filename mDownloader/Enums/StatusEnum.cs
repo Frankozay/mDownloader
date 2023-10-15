@@ -10,6 +10,7 @@ namespace mDownloader.Enums
     {
         Downloading,
         Completed,
+        Pause,
         Error
     }
 }

@@ -1,4 +1,5 @@
 ﻿using mDownloader.Converters;
+using mDownloader.Helpers;
 using mDownloader.Models;
 using mDownloader.Services;
 using System;
@@ -13,14 +14,16 @@ namespace mDownloader.Factories
     public class DownloadObjectFactory
     {
         private readonly HttpClient _httpClient;
-        public DownloadObjectFactory(HttpClient httpClient)
+        private readonly IEventAggregator _eventAggregator;
+        public DownloadObjectFactory(HttpClient httpClient, IEventAggregator eventAggregator)
         {
             _httpClient = httpClient;
+            _eventAggregator = eventAggregator;
         }
 
         public DownloadObject Create(string url, string downloadPath, long totalBytesDownload = 0, int id = -1)
         {
-            var downloadObject = new DownloadObject(_httpClient)
+            var downloadObject = new DownloadObject(_httpClient, _eventAggregator)
             {
                 Url = url,
                 Destination = downloadPath,
@@ -32,7 +35,7 @@ namespace mDownloader.Factories
         }
         public DownloadObject Create(DownloadTask downloadTask)
         {
-            var download = SimpleMapper.Map<DownloadTask, DownloadObject>(downloadTask, new object[] { _httpClient }, false);
+            var download = SimpleMapper.Map<DownloadTask, DownloadObject>(downloadTask, new object[] { _httpClient, _eventAggregator }, false);
             return download;
         }
 

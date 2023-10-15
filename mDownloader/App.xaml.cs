@@ -9,6 +9,7 @@ using mDownloader.Services;
 using mDownloader.ViewModels;
 using mDownloader.Views;
 using mDownloader.Factories;
+using mDownloader.Helpers;
 using System;
 
 namespace mDownloader
@@ -30,13 +31,14 @@ namespace mDownloader
 
         private void ConfigureServices(ServiceCollection services)
         {
-            services.AddHttpClient<DownloadObjectFactory>();
             services.AddTransient<MainWindow>();
             services.AddTransient<AddWindow>();
             services.AddTransient<AddViewModel>();
             services.AddTransient<MainViewModel>();
             services.AddScoped<IDownloadService, DownloadService>();
+            services.AddScoped<IEventAggregator, EventAggregator>();
             services.AddScoped<IWindowService, WindowService>();
+            services.AddHttpClient<DownloadObjectFactory>();
         }
     }
 }
