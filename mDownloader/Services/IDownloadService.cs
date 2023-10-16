@@ -11,5 +11,6 @@ namespace mDownloader.Services
     public interface IDownloadService
     {
         public List<DownloadObject> LoadTasks();
+        public Task<bool> RemoveTask(List<DownloadObject> objects);
     }
 }

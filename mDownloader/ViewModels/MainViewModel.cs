@@ -24,7 +24,10 @@ namespace mDownloader.ViewModels
         private readonly Action<DownloadEvent> _handler;
 
         private ICommand _addDownloadCommand;
+        private ICommand _removeDownloadCommand;
         public ObservableCollection<DownloadObject> DownloadLists { get; } = new();
+
+        public ObservableCollection<DownloadObject> SelectedItems { get; } = new ObservableCollection<DownloadObject>();
 
         public MainViewModel(IDownloadService downloadService, IWindowService windowService, IEventAggregator eventAggregator)
         {
@@ -45,9 +48,25 @@ namespace mDownloader.ViewModels
         }
 
         public ICommand AddDownloadCommand => _addDownloadCommand ??= new RelayCommand(_ => AddDownload());
+        public ICommand RemoveDownloadCommand => _removeDownloadCommand ??= new RelayCommand(_ => RemoveDownload(SelectedItems));
         public void AddDownload()
         {
             _windowService.OpenAddWindow();
+        }
+        public async void RemoveDownload(ObservableCollection<DownloadObject> tasks)
+        {
+            var task = tasks.ToList();
+            if(task.Count == 0) { return; }
+            var isSuccess = await _downloadService.RemoveTask(task);
+            if (isSuccess)
+            {
+                var idsToMove = new HashSet<int>(task.Select(t=>t.Id));
+                var itemsToMove = DownloadLists.Where(t=> idsToMove.Contains(t.Id)).ToList();
+                foreach(var item in itemsToMove)
+                {
+                    DownloadLists.Remove(item);
+                }
+            }
         }
         public void LoadTasks()
         {

@@ -28,9 +28,39 @@ namespace mDownloader.Services
         private readonly IEventAggregator _eventAggregator;
         private object _totalBytesToDownloadLock = new object();
 
-        public int? Progress { get; set; }
-        public DateTime? EstimateTime { get; set; }
-        public long? TransferRate { get; set; }
+        private double? _progress;
+        private double? _estimateTime;
+        private double? _transferRate;
+        private long? _totalBytesDownloadedInCurrentSecond = 0;
+        private long? _totalBytesDownloadedTemp = 0;
+        private Stopwatch _stopwatch = new Stopwatch();
+        public double? Progress
+        {
+            get { return _progress; }
+            set
+            {
+                _progress = value;
+                OnPropertyChanged(nameof(Progress));
+            }
+        }
+        public double? EstimateTime
+        {
+            get { return _estimateTime; }
+            set
+            {
+                _estimateTime = value;
+                OnPropertyChanged(nameof(EstimateTime));
+            }
+        }
+        public double? TransferRate
+        {
+            get { return _transferRate; }
+            set
+            {
+                _transferRate = value;
+                OnPropertyChanged(nameof(TransferRate));
+            }
+        }
 
         public Task? Task { get; private set; }
 
@@ -133,14 +163,26 @@ namespace mDownloader.Services
                             var buffer = new byte[_BUFFER];
                             int bytesRead;
                             int streamBytesDownload = 0;
+                            _totalBytesDownloadedTemp = TotalBytesToDownload;
+                            _stopwatch.Start();
                             while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, _cts.Token)) > 0)
                             {
                                 await outputStream.WriteAsync(buffer.AsMemory(0, bytesRead), _cts.Token);
                                 streamBytesDownload += bytesRead;
+                                _totalBytesDownloadedInCurrentSecond += bytesRead;
+                                _totalBytesDownloadedTemp += bytesRead;
                                 if (streamBytesDownload >= _POINT)
                                 {
                                     UpdateTotalBytesToDownload(streamBytesDownload);
                                     streamBytesDownload = 0;
+                                }
+                                if(_stopwatch.ElapsedMilliseconds >= 1000)
+                                {
+                                    TransferRate = _totalBytesDownloadedInCurrentSecond / (_stopwatch.ElapsedMilliseconds / 1000.0);
+                                    Progress = (double)_totalBytesDownloadedTemp / Size;
+                                    EstimateTime = Size * (1 - Progress) / TransferRate;
+                                    _totalBytesDownloadedInCurrentSecond = 0;
+                                    _stopwatch.Restart();
                                 }
                             }
 
@@ -166,6 +208,11 @@ namespace mDownloader.Services
                                 var dbTask = Task.Run(() => context.SaveChangesAsync());
                                 await dbTask;
                                 this.TotalBytesToDownload = task.TotalBytesToDownload;
+                                this.Status = task.Status;
+                                this.Progress = 1;
+                                this.DateFinished = task.DateFinished;
+                                TransferRate = null;
+                                EstimateTime = null;
                             }
                         }
                     }

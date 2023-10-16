@@ -17,6 +17,32 @@ namespace mDownloader.Services
         public DownloadService(DownloadObjectFactory downloadObjectFactory) {
             _downloadObjectFactory = downloadObjectFactory;
         }
+
+        public async Task<bool> RemoveTask(List<DownloadObject> objs)
+        {
+            try
+            {
+                using (var db = new Models.AppContext())
+                {
+                    foreach (var obj in objs)
+                    {
+                        var task = db.DownloadTasks.Single((t) => t.Id == obj.Id);
+                        if (task == null) {
+                            return false;
+                        }
+                        db.DownloadTasks.Remove(task);
+                        await db.SaveChangesAsync();
+                    }
+                    return true;
+                }
+
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         List<DownloadObject> IDownloadService.LoadTasks()
         {
             List<DownloadObject> res = new();
@@ -29,7 +55,7 @@ namespace mDownloader.Services
 
                     if (taskDisplay.Size != 0)
                     {
-                        taskDisplay.Progress = (int?)(taskDisplay.TotalBytesToDownload / taskDisplay.Size);
+                        taskDisplay.Progress = (double?)(taskDisplay.TotalBytesToDownload / taskDisplay.Size);
                         res.Add(taskDisplay);
                     } else
                     {
