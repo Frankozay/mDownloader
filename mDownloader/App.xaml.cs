@@ -1,22 +1,17 @@
-﻿using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
-using Microsoft.Extensions.DependencyInjection;
+﻿using mDownloader.Factories;
+using mDownloader.Helpers;
 using mDownloader.Services;
 using mDownloader.ViewModels;
 using mDownloader.Views;
-using mDownloader.Factories;
-using mDownloader.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Windows;
 
 namespace mDownloader
 {
     public partial class App : Application
     {
-        public static ServiceProvider? ServiceProvider { get;  set; }
+        public static ServiceProvider? ServiceProvider { get; set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {

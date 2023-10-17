@@ -1,15 +1,32 @@
 ﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:mDownloader.Views"
+        xmlns:converts="clr-namespace:mDownloader.Converters"
+        Closing="Window_Closing"
         x:Name="MainView"
         x:Class="mDownloader.Views.MainWindow"
         Title="mDownloader"
-        Height="400"
-        Width="800"
+        Height="600"
+        Width="1400"
         Top="200"
         Left="200"
         WindowState="Normal"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+         TextElement.FontWeight="Regular"
+         TextElement.FontSize="13"
+         TextOptions.TextFormattingMode="Ideal"
+         TextOptions.TextRenderingMode="Auto"
+         Background="{DynamicResource MaterialDesignPaper}"
+         FontFamily="{DynamicResource MaterialDesignFont}">
+
+    <Window.Resources>
+        <converts:EstimateTimeConverter x:Key="EstimateTimeConverter"/>
+        <converts:SizeConverter x:Key="SizeConverter"/>
+        <converts:TransferRateConverter x:Key="TransferRateConverter"/>
+        <converts:ProgressConverter x:Key="ProgressConverter"/>
+    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -19,24 +36,77 @@
 
         <!-- Buttons -->
         <StackPanel Orientation="Horizontal" Margin="10">
-            <Button Content="Add Download" Margin="0,0,10,0" Command="{Binding AddDownloadCommand}"/>
-            <Button Content="Remove Download" Margin="0,0,10,0" Command="{Binding RemoveDownloadCommand}"/>
-            <Button Content="Continue Download" Margin="0,0,10,0"/>
-            <Button Content="Pause Download" Margin="0,0,10,0"/>
+            <Button Margin="0,0,10,0" Command="{Binding AddDownloadCommand}" Style="{DynamicResource MaterialDesignRaisedButton}" Background="DarkGreen">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Download" Margin="0,0,10,0" />
+                    <TextBlock Text="Add Download" />
+                </StackPanel>
+            </Button>
+
+            <Button Margin="0,0,10,0" Command="{Binding ContinueDownloadCommand}" Style="{DynamicResource MaterialDesignRaisedButton}" Background="Green">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Play" Margin="0,0,10,0" />
+                    <TextBlock Text="Continue Download" />
+                </StackPanel>
+            </Button>
+
+            <Button Margin="0,0,10,0" Command="{Binding PauseDownloadCommand}" Style="{DynamicResource MaterialDesignRaisedButton}" Background="YellowGreen">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Pause" Margin="0,0,10,0" />
+                    <TextBlock Text="Pause Download" />
+                </StackPanel>
+            </Button>
+
+            <Button Margin="0,0,10,0" Command="{Binding RemoveDownloadCommand}" Style="{DynamicResource MaterialDesignRaisedButton}" Background="DarkRed">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Delete" Margin="0,0,10,0" />
+                    <TextBlock Text="Remove Download" />
+                </StackPanel>
+            </Button>
         </StackPanel>
 
         <!-- Data Grid -->
-        <DataGrid x:Name="DownloadDataGrid" ItemsSource="{Binding DownloadLists}" SelectionMode="Extended" local:DataGridExtensions.SelectedItems="{Binding SelectedItems}"  Grid.Row="1" Margin="10" AutoGenerateColumns="False">
+        <DataGrid x:Name="DownloadDataGrid" ItemsSource="{Binding DownloadLists}" SelectionMode="Extended" local:DataGridExtensions.SelectedItems="{Binding SelectedItems}"  Grid.Row="1" Margin="10" AutoGenerateColumns="False"
+                  RowBackground="{DynamicResource MaterialDesignPaper}"
+                  AlternatingRowBackground="{DynamicResource MaterialDesignBackground}"
+                  ColumnHeaderStyle="{DynamicResource MaterialDesignDataGridColumnHeader}"
+                  CellStyle="{DynamicResource MaterialDesignDataGridCell}"> 
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Id" IsReadOnly="True" Binding="{Binding Id}" Visibility="Collapsed"/>
                 <DataGridTextColumn Header="Name" IsReadOnly="True" Binding="{Binding Name}"/>
-                <DataGridTextColumn Header="Size" IsReadOnly="True" Binding="{Binding Size}"/>
-                <DataGridTextColumn Header="Progress" IsReadOnly="True" Binding="{Binding Progress}"/>
+                <DataGridTextColumn Header="Size" IsReadOnly="True" Binding="{Binding Size, Converter={StaticResource SizeConverter}}"/>
+                <DataGridTemplateColumn Header="Progress">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <ProgressBar Value="{Binding Progress}" Minimum="0" Maximum="1" Height="20">
+                                    <ProgressBar.Style>
+                                        <Style TargetType="{x:Type ProgressBar}">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type ProgressBar}">
+                                                        <Border Background="Transparent" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
+                                                            <Grid x:Name="PART_Track">
+                                                                <Rectangle x:Name="PART_Indicator" HorizontalAlignment="Left" Fill="#06B025" />
+                                                            </Grid>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ProgressBar.Style>
+                                </ProgressBar>
+                                <TextBlock Text="{Binding Progress, StringFormat={}{0:P0}}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Status"  IsReadOnly="True" Binding="{Binding Status}"/>
-                <DataGridTextColumn Header="Estimate Time" IsReadOnly="True" Binding="{Binding EstimateTime}"/>
-                <DataGridTextColumn Header="Transfer Rate" IsReadOnly="True" Binding="{Binding TransferRate}"/>
+                <DataGridTextColumn Header="Estimate Time" IsReadOnly="True" Binding="{Binding EstimateTime, Converter={StaticResource EstimateTimeConverter}}"/>
+                <DataGridTextColumn Header="Transfer Rate" IsReadOnly="True" Binding="{Binding TransferRate, Converter={StaticResource TransferRateConverter}}" />
                 <DataGridTextColumn Header="Create Time" IsReadOnly="True" Binding="{Binding DateCreated}"/>
                 <DataGridTextColumn Header="Finish Time" IsReadOnly="True" Binding="{Binding DateFinished}"/>
+                <DataGridTextColumn Header="Download Path" IsReadOnly="True" Binding="{Binding Destination}"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

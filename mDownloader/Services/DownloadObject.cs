@@ -1,21 +1,17 @@
-﻿using mDownloader.Enums;
+﻿using mDownloader.Converters;
+using mDownloader.Event;
+using mDownloader.Helpers;
 using mDownloader.Models;
-using mDownloader.Converters;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.AccessControl;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AppContext = mDownloader.Models.AppContext;
-using mDownloader.Helpers;
-using mDownloader.Event;
 
 namespace mDownloader.Services
 {
@@ -75,15 +71,36 @@ namespace mDownloader.Services
         {
             Task = Task.Run(DownloadFileAsync);
         }
+        public void Pause()
+        {
+            if (Status != Enums.Status.Downloading) return;
+            _cts.Cancel();
+        }
+        public void Resume()
+        {
+            if (!_cts.IsCancellationRequested)
+            {
+                if (Status == Enums.Status.Pause)
+                {
+                    Task = Task.Run(DownloadFileAsync);
+                }
+                else return;
+            }
+            else
+            {
+                _cts = new CancellationTokenSource();
+                Task = Task.Run(DownloadFileAsync);
+            }
+        }
 
 
         private async Task DownloadFileAsync()
         {
-            if(Url == null)
+            if (Url == null)
             {
                 return;
             }
-            if(Destination == null)
+            if (Destination == null)
             {
                 return;
             }
@@ -101,7 +118,7 @@ namespace mDownloader.Services
                             ? response.Content.Headers.ContentDisposition!.FileName
                             : Path.GetFileName(uri.LocalPath);
                         var filePath = Path.Combine(Destination, Name!);
-                        if(File.Exists(filePath))
+                        if (File.Exists(filePath))
                         {
                             Name = Path.GetFileName(GenerateUniqueFileName(filePath));
                         }
@@ -140,7 +157,8 @@ namespace mDownloader.Services
                             // 恢复下载时，建立连接时检查一次就可以了
                             var fileInfo = new FileInfo(Path.Combine(Destination, Name!));
                             TotalBytesToDownload = fileInfo.Length;
-                        } else
+                        }
+                        else
                         {
                             TotalBytesToDownload = 0;
                         }
@@ -148,9 +166,11 @@ namespace mDownloader.Services
                         {
                             var task = context.DownloadTasks.First(t => t.Id == this.Id);
                             task.TotalBytesToDownload = TotalBytesToDownload;
+                            task.Status = Enums.Status.Downloading;
                             context.Update(task);
                             var dbTask = Task.Run(() => context.SaveChangesAsync());
                             await dbTask;
+                            Status = task.Status;
                         }
                     }
 
@@ -176,7 +196,7 @@ namespace mDownloader.Services
                                     UpdateTotalBytesToDownload(streamBytesDownload);
                                     streamBytesDownload = 0;
                                 }
-                                if(_stopwatch.ElapsedMilliseconds >= 1000)
+                                if (_stopwatch.ElapsedMilliseconds >= 1000)
                                 {
                                     TransferRate = _totalBytesDownloadedInCurrentSecond / (_stopwatch.ElapsedMilliseconds / 1000.0);
                                     Progress = (double)_totalBytesDownloadedTemp / Size;
@@ -216,6 +236,21 @@ namespace mDownloader.Services
                             }
                         }
                     }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                FileInfo fileInfo = new FileInfo(Path.Combine(Destination, Name!));
+                long bytesDownloaded = fileInfo.Length;
+                using (var context = new AppContext())
+                {
+                    var task = context.DownloadTasks.First(t => t.Id == this.Id);
+                    task.TotalBytesToDownload = bytesDownloaded;
+                    task.Status = Enums.Status.Pause;
+                    context.Update(task);
+                    await context.SaveChangesAsync();
+                    this.TotalBytesToDownload = task.TotalBytesToDownload;
+                    this.Status = task.Status;
                 }
             }
             catch (Exception ex)

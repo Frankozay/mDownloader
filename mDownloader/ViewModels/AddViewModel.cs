@@ -1,11 +1,10 @@
-﻿using System.Windows.Input;
-using Microsoft.WindowsAPICodePack.Dialogs;
-using mDownloader.Factories;
-using mDownloader.Services;
-using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using mDownloader.Factories;
 using mDownloader.Helpers;
+using mDownloader.Services;
+using Microsoft.WindowsAPICodePack.Dialogs;
+using System;
 using System.IO;
+using System.Windows.Input;
 
 namespace mDownloader.ViewModels
 {
@@ -18,6 +17,7 @@ namespace mDownloader.ViewModels
         private string _selectedPath;
         private ICommand _downloadCommand;
         private ICommand _choosePathCommand;
+        private ICommand _cancelCommand;
 
         public AddViewModel(IDownloadService downloadService, IWindowService windowService, DownloadObjectFactory downloadObjectFactory)
         {
@@ -50,6 +50,7 @@ namespace mDownloader.ViewModels
         public ICommand DownloadCommand => _downloadCommand ??= new RelayCommand(_ => DownloadNewTask());
 
         public ICommand ChoosePathCommand => _choosePathCommand ??= new RelayCommand(_ => ChoosePath());
+        public ICommand CancelCommand => _cancelCommand ??= new RelayCommand(_ => _windowService.CloseAddWindow());
 
         private void DownloadNewTask()
         {

@@ -1,6 +1,5 @@
 ﻿using mDownloader.Enums;
 using System;
-using System.Collections.Generic;
 
 namespace mDownloader.Models;
 

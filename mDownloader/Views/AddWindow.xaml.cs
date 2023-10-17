@@ -1,13 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
+﻿using mDownloader.ViewModels;
 using System.Windows;
-using System.Windows.Controls;
-using mDownloader;
-using mDownloader.Services;
-using mDownloader.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace mDownloader.Views
 {

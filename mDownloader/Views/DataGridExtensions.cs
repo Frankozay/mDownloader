@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+﻿using System.Collections;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace mDownloader.Views
 {
@@ -46,12 +41,15 @@ namespace mDownloader.Views
             if (sender is DataGrid dataGrid)
             {
                 var selectedItems = GetSelectedItems(dataGrid);
-                selectedItems.Clear();
 
-                if (dataGrid.SelectedItems != null)
+                foreach (var item in e.RemovedItems)
                 {
-                    foreach (var item in dataGrid.SelectedItems)
-                        selectedItems.Add(item);
+                    selectedItems.Remove(item);
+                }
+
+                foreach (var item in e.AddedItems)
+                {
+                    selectedItems.Add(item);
                 }
             }
         }

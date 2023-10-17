@@ -2,12 +2,7 @@
 using mDownloader.Helpers;
 using mDownloader.Models;
 using mDownloader.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace mDownloader.Factories
 {

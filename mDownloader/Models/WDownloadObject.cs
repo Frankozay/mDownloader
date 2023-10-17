@@ -1,12 +1,6 @@
 ﻿using mDownloader.Enums;
-using mDownloader.Services;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace mDownloader.Models
@@ -57,11 +51,18 @@ namespace mDownloader.Models
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                Debug.WriteLine($"property changed {propertyName}");
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            });
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
         }
 
     }

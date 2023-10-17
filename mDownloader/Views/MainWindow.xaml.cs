@@ -1,24 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using mDownloader;
-using mDownloader.Models;
+﻿using mDownloader.Event;
+using mDownloader.Helpers;
 using mDownloader.Services;
 using mDownloader.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
+using System.Windows;
 
 namespace mDownloader.Views
 {
@@ -28,13 +12,26 @@ namespace mDownloader.Views
     public partial class MainWindow : Window
     {
         private readonly IWindowService _windowService;
+        private readonly IEventAggregator _eventAggregator;
 
-        public MainWindow(MainViewModel mainViewModel, IWindowService windowService)
+        public MainWindow(MainViewModel mainViewModel, IWindowService windowService, IEventAggregator eventAggregator)
         {
             InitializeComponent();
             DataContext = mainViewModel;
             _windowService = windowService;
+            _eventAggregator = eventAggregator;
+            _eventAggregator.Subscribe<RequestFocusEvent>(OnRequestFocus);
             _windowService.SetOwner(this);
+            this.Closed += (s, e) => _eventAggregator.Unsubscribe<RequestFocusEvent>(OnRequestFocus);
+        }
+        private void OnRequestFocus(RequestFocusEvent @event)
+        {
+            DownloadDataGrid.Focus();
+        }
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            var mainViewModel = (MainViewModel)DataContext;
+            mainViewModel.OnExit();
         }
 
     }

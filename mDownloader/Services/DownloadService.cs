@@ -1,33 +1,61 @@
-﻿using mDownloader.Models;
+﻿using mDownloader.Factories;
+using mDownloader.Models;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using mDownloader.Converters;
-using mDownloader.Factories;
 
 namespace mDownloader.Services
 {
     public class DownloadService : IDownloadService
     {
         private readonly DownloadObjectFactory _downloadObjectFactory;
-        public DownloadService(DownloadObjectFactory downloadObjectFactory) {
+        public DownloadService(DownloadObjectFactory downloadObjectFactory)
+        {
             _downloadObjectFactory = downloadObjectFactory;
+        }
+
+        public void PauseTask(List<DownloadObject> objects)
+        {
+            try
+            {
+                foreach (var task in objects)
+                {
+                    task.Pause();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public void ContinueTask(List<DownloadObject> objects)
+        {
+            try
+            {
+                foreach (var task in objects)
+                {
+                    task.Resume();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<bool> RemoveTask(List<DownloadObject> objs)
         {
             try
             {
+                PauseTask(objs);
                 using (var db = new Models.AppContext())
                 {
                     foreach (var obj in objs)
                     {
                         var task = db.DownloadTasks.Single((t) => t.Id == obj.Id);
-                        if (task == null) {
+                        if (task == null)
+                        {
                             return false;
                         }
                         db.DownloadTasks.Remove(task);
@@ -37,7 +65,7 @@ namespace mDownloader.Services
                 }
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
@@ -55,9 +83,10 @@ namespace mDownloader.Services
 
                     if (taskDisplay.Size != 0)
                     {
-                        taskDisplay.Progress = (double?)(taskDisplay.TotalBytesToDownload / taskDisplay.Size);
+                        taskDisplay.Progress = (double?)((double)taskDisplay.TotalBytesToDownload / taskDisplay.Size);
                         res.Add(taskDisplay);
-                    } else
+                    }
+                    else
                     {
                         throw new Exception("Size is null");
                     }

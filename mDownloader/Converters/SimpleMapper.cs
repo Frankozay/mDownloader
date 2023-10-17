@@ -1,16 +1,11 @@
-﻿using mDownloader.Models;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace mDownloader.Converters
 {
     public static class SimpleMapper
     {
-        public static TTarget Map<TSource, TTarget>(TSource source, object[]? ctorArgs=null, Boolean expectedId=false)
+        public static TTarget Map<TSource, TTarget>(TSource source, object[]? ctorArgs = null, Boolean expectedId = false)
             where TSource : class
             where TTarget : class
         {
@@ -21,14 +16,15 @@ namespace mDownloader.Converters
             var sourceProperties = typeof(TSource).GetProperties();
             var targetProperties = typeof(TTarget).GetProperties();
 
-            foreach ( var sourceProp in sourceProperties )
+            foreach (var sourceProp in sourceProperties)
             {
-                if (expectedId && sourceProp.Name == "Id") { 
+                if (expectedId && sourceProp.Name == "Id")
+                {
                     continue;
                 }
                 var targetProp = targetProperties.FirstOrDefault(p =>
                 p.Name == sourceProp.Name);
-                if(targetProp != null && targetProp.CanWrite && sourceProp.CanRead)
+                if (targetProp != null && targetProp.CanWrite && sourceProp.CanRead)
                 {
                     var value = sourceProp.GetValue(source);
                     if (value != null || Nullable.GetUnderlyingType(sourceProp.PropertyType) != null)

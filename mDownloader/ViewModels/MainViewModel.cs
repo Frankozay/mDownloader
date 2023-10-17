@@ -1,16 +1,10 @@
 ﻿using mDownloader.Event;
 using mDownloader.Helpers;
-using mDownloader.Models;
 using mDownloader.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -25,9 +19,11 @@ namespace mDownloader.ViewModels
 
         private ICommand _addDownloadCommand;
         private ICommand _removeDownloadCommand;
+        private ICommand _continueDownloadCommand;
+        private ICommand _pauseDownloadCommand;
         public ObservableCollection<DownloadObject> DownloadLists { get; } = new();
 
-        public ObservableCollection<DownloadObject> SelectedItems { get; } = new ObservableCollection<DownloadObject>();
+        public ObservableCollection<DownloadObject> SelectedItems { get; private set; } = new ObservableCollection<DownloadObject>();
 
         public MainViewModel(IDownloadService downloadService, IWindowService windowService, IEventAggregator eventAggregator)
         {
@@ -49,6 +45,8 @@ namespace mDownloader.ViewModels
 
         public ICommand AddDownloadCommand => _addDownloadCommand ??= new RelayCommand(_ => AddDownload());
         public ICommand RemoveDownloadCommand => _removeDownloadCommand ??= new RelayCommand(_ => RemoveDownload(SelectedItems));
+        public ICommand ContinueDownloadCommand => _continueDownloadCommand ??= new RelayCommand(_ => ContinueDownload(SelectedItems));
+        public ICommand PauseDownloadCommand => _pauseDownloadCommand ??= new RelayCommand(_ => PauseDownload(SelectedItems));
         public void AddDownload()
         {
             _windowService.OpenAddWindow();
@@ -56,17 +54,36 @@ namespace mDownloader.ViewModels
         public async void RemoveDownload(ObservableCollection<DownloadObject> tasks)
         {
             var task = tasks.ToList();
-            if(task.Count == 0) { return; }
+            if (task.Count == 0) { return; }
             var isSuccess = await _downloadService.RemoveTask(task);
             if (isSuccess)
             {
-                var idsToMove = new HashSet<int>(task.Select(t=>t.Id));
-                var itemsToMove = DownloadLists.Where(t=> idsToMove.Contains(t.Id)).ToList();
-                foreach(var item in itemsToMove)
+                var idsToMove = new HashSet<int>(task.Select(t => t.Id));
+                var itemsToMove = DownloadLists.Where(t => idsToMove.Contains(t.Id)).ToList();
+                foreach (var item in itemsToMove)
                 {
                     DownloadLists.Remove(item);
                 }
             }
+            ClearSelectedItems();
+        }
+        public void ContinueDownload(ObservableCollection<DownloadObject> tasks)
+        {
+            var task = tasks.ToList();
+            if (task.Count == 0) { return; }
+            _downloadService.ContinueTask(task);
+            _eventAggregator.Publish(new RequestFocusEvent());
+        }
+        public void PauseDownload(ObservableCollection<DownloadObject> tasks)
+        {
+            var task = tasks.ToList();
+            if (task.Count == 0) { return; }
+            _downloadService.PauseTask(task);
+            _eventAggregator.Publish(new RequestFocusEvent());
+        }
+        private void ClearSelectedItems()
+        {
+            SelectedItems = new ObservableCollection<DownloadObject>();
         }
         public void LoadTasks()
         {
@@ -76,6 +93,12 @@ namespace mDownloader.ViewModels
             {
                 DownloadLists.Add(task);
             }
+        }
+        public void OnExit()
+        {
+            var task = DownloadLists.ToList();
+            if (task.Count == 0) { return; }
+            _downloadService.PauseTask(task);
         }
         public void Dispose()
         {
