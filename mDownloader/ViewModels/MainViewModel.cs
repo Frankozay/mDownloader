@@ -83,7 +83,7 @@ namespace mDownloader.ViewModels
         }
         private void ClearSelectedItems()
         {
-            SelectedItems = new ObservableCollection<DownloadObject>();
+            SelectedItems.Clear();
         }
         public void LoadTasks()
         {

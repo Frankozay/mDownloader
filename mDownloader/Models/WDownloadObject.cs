@@ -53,7 +53,7 @@ namespace mDownloader.Models
         {
             try
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current?.Dispatcher.Invoke(() =>
                 {
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
                 });

@@ -75,6 +75,8 @@ namespace mDownloader.Services
         {
             if (Status != Enums.Status.Downloading) return;
             _cts.Cancel();
+            EstimateTime = null;
+            TransferRate = null;
         }
         public void Resume()
         {
