@@ -15,13 +15,22 @@ namespace mDownloader
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            var serviceCollection = new ServiceCollection();
-            ConfigureServices(serviceCollection);
+            try
+            {
+                var serviceCollection = new ServiceCollection();
+                ConfigureServices(serviceCollection);
 
-            ServiceProvider = serviceCollection.BuildServiceProvider();
-            base.OnStartup(e);
-            var mainWindow = ServiceProvider.GetService<MainWindow>();
-            mainWindow!.Show();
+                ServiceProvider = serviceCollection.BuildServiceProvider();
+                base.OnStartup(e);
+                var mainWindow = ServiceProvider.GetService<MainWindow>();
+                mainWindow!.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                throw new Exception("crack");
+            }
+
         }
 
         private void ConfigureServices(ServiceCollection services)
