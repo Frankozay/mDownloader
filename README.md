@@ -3,6 +3,7 @@
 适用于Windows的下载管理器（仅学习用）。
 使用.net7、WPF、SQLServer、EFCore进行开发。
 实现了基本功能。
+已将数据库迁移至Sqlite。
 
 ![Screenshot](screenshot.png?raw=true)
 
